@@ -1,0 +1,499 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<style type="text/css">
+		body
+		{
+			margin: 0;
+			padding: 0;
+		}
+		canvas
+		{
+			display: block;
+			float: left;
+			margin: 20px auto;
+			box-shadow: -2px -2px 2px #F3F2F2, 5px 5px 5px #6F6767;
+			border:1px solid black;
+		}
+		button
+		{
+			cursor: pointer;
+			width: 170px;
+			height: 44px;
+			margin-top: 25px;
+			padding: 0;
+			background: #131717;
+			border-radius: 6px;
+			box-shadow: 0 15px 30px 0 rgba(255,255,255,.25) inset, 0 2px 7px 0 rgba(0,0,0,.2);
+			font-size: 18px;
+			font-weight: 800;
+			color: #00D9FF;
+		}
+		h1 
+		{
+			margin: 10px auto;
+		}
+		.container
+		{
+			width: 1100px;
+			margin: 0 auto;
+		}
+		.game
+		{
+			margin: 20px 0;
+			border-radius: 15px;
+			border: 1px solid #CCC;
+			padding: 20px;
+		}
+		.game:hover
+		{
+			box-shadow: 0 0 5px 3px #CCC;
+		}
+		.info-box
+		{
+			float: left;
+			width: 180px;
+			padding-left: 30px;
+			margin-top: 15px;
+		}
+		.timer-display
+		{
+			border-radius: 6px;
+			width: 170px;
+			height: 44px;
+			background: #0E1315;		
+			line-height: 44px;
+			font-size: 34px;
+			font-weight: 300;
+			color: #00D9FF;		
+			text-align: center;
+		}
+	</style>
+	<title>无尽迷宫</title>
+</head>
+<body>
+	<div class="container">
+		<h1 id="h1">无尽迷宫</h1>
+				<canvas id="canvas" class="canvas"></canvas>
+				<div class="info-box">
+					<div id="timer" class="timer-display">00:00.000</div>
+					<button id="start" onclick="start()">开始游戏</button>
+					<button onclick="restart(true)">换个迷宫</button>
+					<button onclick="zero()">从头开始</button>
+					<button onclick="restart(false)">重玩本关</button>
+					<button onclick="bfs(true)">提示</button>
+					<button onclick="auto()">开挂</button>
+				</div>
+	</div>
+	<script type="text/javascript">
+		//地图迷宫采用 最小生成树kruskal算法+并查集 自动生成
+		//迷宫求解采用广度优先遍历（BFS）生成
+	
+		//根据屏幕高度确定画布的高度
+		var hei=document.body.clientHeight;
+		//document.getElementsByClassName('game')[0].style['min-height']=hei-150;
+		canvas.height=hei-110;
+		canvas.width=canvas.height;
+		//变量
+		var level=0;//关卡数
+		var lie=10;//lie * lie 的地图
+		var iv=20;//interval
+		var endPoint=0;//终点的位置，二维坐标转一维 下标从0，行优先
+		var nx=0, ny=0;//当前所在位置，二维坐标 下标从0
+		var isRun=0;//游戏是否在运行
+		var isAuto=false;
+		var m=s=ms=0;//时，分，秒，毫秒
+		var time;//绑定计时器，用于清除
+		var can=document.getElementById("canvas").getContext("2d");//获取画布
+		//声明数组 用[]类似于map，new Array()类似于vector
+		var tree = [];//父亲
+		var high = [];//树高
+		var flag = [];//是否联通
+		var total_use_time=0;
+		//var tot_st=Date.now();
+		main();//调用main函数
+		
+		//函数
+		async function main()//main函数
+		{
+			lie=Math.min(10+level, 32);
+			level++;
+			if(level<=100)
+			{
+				//alert('关卡：'+level);
+				document.getElementById("h1").innerHTML="无尽迷宫 第"+level+"关";
+			}
+			else
+			{
+				clearInterval(time);
+				isRun=0;
+				//var tot_ed=Date.now();
+				//alert("total_use_time = "+(tot_ed-tot_st));
+				alert('算了，恭喜你通关了！');
+				return ;
+			}			
+			init();
+			drawGrid();//画网格
+			create();//生成迷宫
+			go();//画起点终点并设置按键监听
+			//await sleep(200);
+			if(isAuto) dfs(0,0);
+		}
+		function init()//数据初始化
+		{
+			nx=0, ny=0;//迷宫起点固定左上角
+			m=s=ms=0;//重新计时
+			//iv=canvas.height/lie-1;
+			iv=parseInt(canvas.height/lie)-1;//根据列数确定间隔
+			canvas.height=canvas.height;//重置canvas的大小，清空画布
+			for(var i=0;i<lie*lie;i++)//初始化
+			{
+				tree[i]=i, high[i]=1;//初始每个节点的父亲都是自己，树高为1
+				flag[i]=[];
+				for(var j=0;j<lie*lie;j++) flag[i][j]=0;//都不联通
+			}
+		}
+		function drawGrid()//画出整个方格
+		{
+			for(var i=0;i<=lie;i++)
+			{
+				can.strokeStyle='gray';//画笔颜色
+				can.moveTo(15+i*iv,15);//线起始坐标//垂直方向画线
+				can.lineTo(15+i*iv,15+iv*lie);//线结束坐标
+				can.stroke();//画线
+				can.moveTo(15,15+i*iv);//水平方向
+				can.lineTo(15+iv*lie,15+i*iv);
+				can.stroke();
+			}
+		}
+		function create()//创建迷宫
+		{		
+			endPoint=parseInt(Math.random() * lie);//最后一行随机一个终点
+			endPoint = (lie-1) * lie + endPoint;
+			while(find(0) != find(endPoint))//起点与终点没有路
+			{
+				var point = parseInt(Math.random() * lie * lie);//随机一个点
+				var nei = neighbor(point);//获得邻居
+				if(find(point) != find(nei))//没连在一起
+				{
+					flag[point][nei]= flag[nei][point] = 1;//两个联通
+					erase(point, nei);//擦除两个格子中间的线
+					unite(point, nei);//合并
+				}
+			}
+		}
+		function bfs(flag2)//bfs路径记录//因为是有解的迷宫，所以怎么走都不可能无解，故直接bfs不必考虑找不到终点
+		{
+			var st=ny*lie+nx, ed=endPoint;
+			var que = new Array();//手动实现队列
+			var f=[];//是否访问
+			var ans=[];//路径记录
+			for(var i=0;i<lie*lie;i++) f[i]=0,ans[i]=-1;//全部未访问
+			que.push(st);
+			var top=0;//队首
+			can.fillStyle='#F6E25B';
+			while(top != que.length)//队列非空
+			{
+				var a=que[top++];//弹出队首
+				if(f[a]==1) continue;
+				f[a]=1;//标记被访问过了
+				if(a==endPoint) break;
+				var y=parseInt(a/lie), x=a%lie;//行列坐标
+				if(y-1>=0 && f[a-lie]==0 && flag[a][a-lie]==1)//上
+					que.push(a-lie), ans[a-lie]=a;
+				if(y+1<lie && f[a+lie]==0 && flag[a][a+lie]==1)//下
+					que.push(a+lie), ans[a+lie]=a;
+				if(x-1>=0 && f[a-1]==0 && flag[a][a-1]==1)//左
+					que.push(a-1), ans[a-1]=a;
+				if(x+1<lie && f[a+1]==0 && flag[a][a+1]==1)//右
+					que.push(a+1), ans[a+1]=a;
+			}
+			var tmp=endPoint;//打印路径
+			var num=0;
+			var ret=new Array();
+			ret.push(tmp);
+			while(ans[tmp]!=st)
+			{
+				tmp=ans[tmp];
+				ret.push(tmp);
+				num++;
+				if(flag2!=-1)
+				drawRect(tmp%lie, parseInt(tmp/lie),flag2);
+			}
+			can.fillStyle='black';
+			if(flag2==-1) 
+			return ret;
+			//return num;
+		}
+		function find(a)//找根//不能路径压缩！！！！
+		{
+			if(tree[a] != a) return find(tree[a]);
+			return a;
+		}
+		function unite(a,b)//合并
+		{
+			a=find(a), b=find(b);
+			if(high[a] > high[b])//矮树合并到高树
+			{
+				high[a]+=high[b];
+				tree[b]=a;
+			}
+			else
+			{
+				high[b]+=high[a];
+				tree[a]=b;
+			}
+		}
+		function neighbor(a)//返回一个邻居用来联通 参数为一维坐标 下标从0开始
+		{
+			var y=parseInt(a/lie), x=a%lie;//行列坐标
+			var have=new Array();//邻居数组
+			if(y-1>=0)//上
+				have.push(a-lie);
+			if(y+1<lie)//下
+				have.push(a+lie);
+			if(x-1>=0)//左
+				have.push(a-1);
+			if(x+1<lie)//右
+				have.push(a+1);
+			var ret=parseInt(Math.random() * have.length);//随机选一个邻居
+			return have[ret];
+		}
+		function erase(a,b)//擦除方格间的线 参数为两个方格的一维坐标 下标从0开始
+		{
+			var y1=parseInt(a/lie), x1=a%lie, y2=parseInt(b/lie), x2=b%lie;
+			var x=(x1+x2)/2;
+			var y=(y1+y2)/2;
+			if(x1 != x2)//擦上下
+				can.clearRect(x*iv+iv/2+14,y*iv+16,2,iv-2);
+			else//擦左右
+				can.clearRect(x*iv+16,y*iv+iv/2+14,iv-2,2);
+		}
+		function drawRect(x,y,flag)//画方块 参数为方块二维坐标 和 是否填充，0开始
+		{
+			var vi=iv/6;//上下左右留 1/6 的空间，不取整
+			var dx=x*iv+15+vi, dy=y*iv+15+vi;//坐标转像素
+			if(flag)can.fillRect(dx,dy,vi*4,vi*4);//填充则画方块
+			else can.clearRect(dx-1,dy-1,vi*4+2,vi*4+2);//不填充则清除方块，稍微清大一点，避免小数导致的边界残留
+		}
+		function listenKeyDown(e)//按键监听
+		{
+			if(isRun==0) return;//当游戏没有开始时，不响应按键
+			var key = e.keyCode ? e.keyCode : e.which;
+			var tx=ny*lie+nx;
+			press(key);
+		}
+		function go()//把起点和终点画出来，任务完成
+		{
+			can.fillStyle='black';//画笔为黑色
+			drawRect(0,0,true);//画一个黑色方块，位置0，0
+			can.fillStyle='red';//画笔为红色
+			drawRect(endPoint%lie, parseInt(endPoint/lie),true);//画一红色方块，位置为终点位置
+			can.fillStyle='black';//重置画笔为黑色
+			window.addEventListener('keydown', listenKeyDown);//窗口监听
+		}
+		function restart(flag)//重新开始，即从0开始
+		{
+			bfs(false);//清除bfs生成的方块
+			drawRect(nx, ny, false);//清除方块当前位置
+			nx=ny=0;
+			drawRect(nx, ny, true);//在起点画一个方块
+			h=m=s=ms=0;//时间清零
+			document.getElementById('timer').innerHTML="00:00.000";
+			document.getElementById("start").innerHTML="开始游戏";
+			isRun=0;
+			clearInterval(time);
+			if(flag) {
+			level--;
+			main();}
+		}
+		function zero()
+		{
+			//lie=10;
+			level=0;
+			main();
+		}
+		function start()//开始游戏
+		{
+			document.getElementById("start").innerHTML="暂停";
+			document.getElementById("start").onclick=stop;
+			isRun=1;
+			time=setInterval(timer,50);//每50ms调用一次计时器函数
+		}
+		function stop()//暂停游戏
+		{
+			document.getElementById("start").innerHTML="继续游戏";
+			document.getElementById("start").onclick=start;
+			isRun=0;
+			clearInterval(time);//清除该计时器
+		}		
+		function timer()//计时器
+		{
+			ms=ms+50;
+			if(ms>=1000) ms=0, s++;
+			if(s>=60) s=0, m++;
+			str = preZ(m)+":"+preZ(s)+"."+preZZ(ms);
+			document.getElementById('timer').innerHTML = str;
+		}
+		function preZ(n)//补前导0
+		{
+			if(n<10) n="0"+n;
+			return n;
+		}
+		function preZZ(n)//补两个0
+		{
+			if(n<10) n="00"+n;
+			else if(n<100) n="0"+n;
+			return n;
+		}
+		function auto()
+		{
+			isAuto=!isAuto;
+			if(!isAuto) return;
+			var st=ny*lie+nx, ed=endPoint;
+			var f=[];//是否访问
+			for(var i=0;i<lie*lie;i++) f[i]=0;//全部未访问
+			var xx=dfs(st, f);
+			if(xx==true) main();	
+		}
+		async function dfs(a, f)//参数为 当前位置 与 flag标记数组
+		{
+			//var sta=Date.now();
+			var step=1;
+			//var max=bfs(-1)+5;
+			var ans=bfs(-1);
+			//console.log(ans);
+			while(ans.length!=0 && isAuto)
+			{
+				await sleep(50);
+				var x=ans.pop();
+				//console.log("now x="+x+" a="+a);
+				if(x==a-lie) press(38);
+				else if(x==a+lie) press(40);
+				else if(x==a+1) press(39);
+				else if(x==a-1) press(37);
+				else continue;
+				a=x;
+			}
+			//console.log("out, ans.length="+ans.length);
+			return true;
+			//var max=214748364;
+			while(true)
+			{
+				await sleep(100);
+				var y=parseInt(a/lie), x=a%lie;//行列坐标
+				//console.log(x+" "+y+"**"+f+"??"+step+" "+a);
+				if(y-1>=0 && f[a-lie]==0 && flag[a][a-lie]==1 && step<max)//up 38
+				{
+					f[a]=step;
+					step++;
+					if(a-lie==endPoint) break;//走到了终点，返回
+					a-=lie;
+					press(38);//模拟按下方向上键
+					continue;
+				}
+				if(y+1<lie && f[a+lie]==0 && flag[a][a+lie]==1 && step<max)//下 40
+				{
+					f[a]=step;
+					step++;
+					if(a+lie==endPoint) break;//走到了终点，返回
+					a+=lie;
+					press(40);//模拟按下方向上键
+					continue;
+				}
+				if(x-1>=0 && f[a-1]==0 && flag[a][a-1]==1 && step<max)//左 37
+				{
+					f[a]=step;
+					step++;
+					if(a-1 == endPoint) break;
+					a-=1;
+					press(37);
+					continue;
+				}
+				if(x+1<lie && f[a+1]==0 && flag[a][a+1]==1 && step<max)//右 39
+				{
+					f[a]=step;
+					step++;
+					if(a+1 == endPoint) break;
+					a+=1;
+					press(39);
+					continue;
+				}
+				if(f[a+lie]==step-1)//
+				{
+					f[a]=-1;
+					a+=lie;
+					step--;
+					press(40);
+					continue;
+				}
+				if(f[a-lie]==step-1)
+				{
+					f[a]=-1;
+					a-=lie;
+					step--;
+					press(38);
+					continue;
+				}
+				if(f[a+1]==step-1)
+				{
+					f[a]=-1;
+					a+=1;
+					step--;
+					press(39);
+					continue;
+				}
+				if(f[a-1]==step-1)
+				{
+					f[a]=-1;
+					a-=1;
+					step--;
+					press(37);
+					continue;
+				}
+			}
+			//var end=Date.now();
+			//total_use_time+=end-sta;
+			//console.log("use time: "+(end-sta));
+			if(a+1==endPoint) press(39);
+			else if(a-1 == endPoint) press(37);
+			else if(a+lie==endPoint) press(40);
+			else press(38);
+		}
+		function sleep(ms)
+		{
+			return new Promise(resolve => setTimeout(resolve, ms))
+		}
+		function press(key)
+		{
+			var tx=ny*lie+nx;
+			if(key==37 && nx>0 && flag[tx][tx-1]==1)//left
+			{
+				drawRect(nx,ny,false);//清除当前方块
+				drawRect(--nx,ny,true);//左边格子画一个方块，表示当前方块往左移
+			}
+			else if(key==38 && ny>0 && flag[tx][tx-lie]==1)//up
+			{
+				drawRect(nx,ny,false);
+				drawRect(nx,--ny,true);
+			}
+			else if(key==39 && nx<lie-1 && flag[tx][tx+1]==1)//right
+			{
+				drawRect(nx,ny,false);
+				drawRect(++nx,ny,true);
+			}
+			else if(key==40 && ny<lie-1 && flag[tx][tx+lie]==1)//down
+			{
+				drawRect(nx,ny,false);
+				drawRect(nx,++ny,true);
+			}
+			if(ny*lie+nx == endPoint)//走到终点
+			{
+				drawRect(nx,ny,false);//清除方块
+				//if(lie<50) lie+=2;//迷宫难度加大,最大50*50
+				main();//重新开始
+			}
+		}
+	</script>
+</body>
+</html>
