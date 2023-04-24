@@ -1,0 +1,56 @@
+#include "res.h"//虽然不想多个文件，但不这样就没办法用资源好像 
+#include "windows.h"
+
+IDR_MENU MENU
+BEGIN
+	POPUP "游戏(G)"
+	BEGIN
+		MENUITEM "新游戏",                        ID_NEW_GAME
+		MENUITEM SEPARATOR
+		MENUITEM "双人对战",                      ID_HUMAN
+		POPUP "人机对战"
+		BEGIN
+		MENUITEM "人先手",						  ID_FIRST_HUMAN
+		MENUITEM "电脑先手",						  ID_FIRST_AI
+		END
+//		MENUITEM "人机对战",                      ID_AI
+		MENUITEM SEPARATOR
+		MENUITEM "退出",                          ID_EXIT
+	END
+    POPUP "帮助(H)"
+    BEGIN
+        MENUITEM "查看帮助",                      ID_SHOW_HELP
+        MENUITEM SEPARATOR
+        MENUITEM "关于五子棋",                      ID_ABOUT
+    END
+END
+
+
+ICON_WINDOW 	ICON 					"icon.ico"//窗口图标 
+//ICON_OVER 		BITMAP 					"gameover.bmp"//游戏结束图 
+//ICON_VIC 		BITMAP 					"victory.bmp"
+
+//WAV_BG 			WAVE DISCARDABLE 		".\\res\\bg.wav"//背景音乐， DISCARDABLE 不可缺少 
+//WAV_VIC 		WAVE DISCARDABLE 		"res\\victory.wav"//游戏胜利时的背景音乐 
+//WAV_FAIL 		WAVE DISCARDABLE 		"res\\failure.wav"//游戏失败时的 
+#if 0
+rc文件的语法：
+ 
+1.注释：注释方式和 C 语言相通，单行注释用 // 符号，多行注释用 /* … */ 符号。
+
+2.预处理命令：预处理指令包括一些头文件的引用(使用 #include ，也同 C 语言)。
+
+3.编译指令：预定义(#define，常量和宏，不支持带参数的宏) 和 条件编译(#if, #ifdef, #undef, #ifndef, #else, #elif, #endif 等)。
+
+4.资源定义声明：资源定义的声明中包括“资源”(Resources)，”控件”(Controls) 和 “声明”(Statements) 3 类。
+
+//一二步可以互换
+--01  gcc -c main.cpp -o win.o -m32 
+//--将源代码编译但不生成最终exe。应该一个都不能缺，如果是64位机可以不要-m32 这一步可以不要，没错，可以不要 
+--02  windres rc.rc -F pe-i386 -o rc.res -O coff 
+//--参数一个都不能缺，否则格式错误。在64位机上应该可以不要“-F pe-i386”，这个表示用32位编译
+--03  g++ win.o rc.res -o win.exe -m32 -lwinmm -lmsimg32 -l Gdi32 -std=c++11 -mwindows 
+//--生成exe文件 -mwindows表示不要控制台窗口。-m32表示以32位编译 如果没有第01步，就把.o换成.cpp  
+#endif
+
+
