@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>file list</title>
+</head>
+<body>
+
+ <input type="file" name="" id="myFile" value="" multiple="multiple" />
+ <div id="div"></div>
+<script type="text/javascript">
+	/*function shows(file) {
+		console.log("sfsfsdfs");
+		for (var i=0, len = file.files.length; i<len; i++)
+		{
+			console.log(file.files[i].name);
+		}
+	}
+
+	var FILE = document.getElementById("myFile");
+	FILE.addEventListener("change", shows(this));*/
+	
+	
+    window.onload = function() {
+        var oFile = document.getElementById("myFile");
+		var div = document.getElementById("div");
+        var oCotnent = document.getElementById("content");
+        oFile.addEventListener("change", function(ev) {
+            var event = ev || window.event;
+            var files = this.files;
+            for (var i = 0, len = files.length; i < len; i++) {
+				console.log(files[i].name);
+                var fname = files[i].name;
+				var p = document.createElement("p");
+				p.innerHTML = fname;
+				div.appendChild(p);
+				var music = document.createElement("audio");
+				music.controls = true;
+				music.src="sounds/"+fname;
+				p.appendChild(music);
+            }
+        }, false);
+    }
+</script>
+</body>
+</html>

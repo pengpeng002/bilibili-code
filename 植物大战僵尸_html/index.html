@@ -1,0 +1,38 @@
+<html>
+<head>
+	<title>植物大战僵尸 - 鹏鹏</title>
+	<link rel="stylesheet" href="style.css">
+	
+</head>
+<body>
+<div class="context">
+	<div id="btn-startGame" class="btn-startGame"></div>
+	<!-- 后面三个div button实际上根本没用，累了不想写了 -->
+	<div id="button2", class="button2"></div>
+	<div id="button3", class="button3"></div>
+	<div id="button4", class="button4"></div>
+	<!-- 实际上是暂停游戏按钮 -->
+	<div id="btn-menu" class="btn-menu">菜单</div>
+	<div id="options" class="options">
+		<div id="btn-continue" class="btn-continue">继续游戏</div>
+		<!-- <div id="btn-continue" class="restart">continue</div> -->
+	</div>
+	<canvas id="canvas" class="canvas">
+		
+	</canvas>
+	
+</div>
+<audio id="audios" src="sounds/MainTheme.mp3">
+	<!-- <source src="sounds/MainTheme.mp3"> -->
+</audio>
+<!-- 这里js一定要放在后面，不然会有一堆毛病 -->
+<!-- 而且这三个js的顺序也不能改。 -->
+<!-- config提供js用到的所有变量，相当于全局变量都在这里 -->
+<script type="text/javascript" src="js/config.js"></script>
+<!-- classed提供游戏用到的类的实现，用到了config里的东西 -->
+<script type="text/javascript" src="js/classes.js"></script>
+<!-- main1是游戏主体的实现，用到了config和classes -->
+<script type="text/javascript" src="js/main1.js"></script>
+
+</body>
+</html>

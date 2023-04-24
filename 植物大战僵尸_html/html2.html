@@ -1,0 +1,30 @@
+<html>
+<head>
+<style type="text/css">
+	canvas
+	{
+		<!-- display: block; -->
+		<!-- float: left; -->
+		<!-- margin: 20px auto; -->
+		<!-- box-shadow: -2px -2px 2px #F3F2F2, 5px 5px 5px #6F6767; -->
+		border:1px solid black;
+		width: 900px;
+		height: 600px;
+	}
+</style>
+</head>
+<body>
+<canvas id="canvas" class="canvas"></canvas>
+<script type="text/javascript">
+	var hei=document.body.clientHeight;
+	//document.getElementsByClassName('game')[0].style['min-height']=hei-150;
+	<!-- canvas.width=canvas.height=hei-200; -->
+	var can=document.getElementById("canvas").getContext("2d");//获取画布
+	var img = new Image();
+	img.src="images/SeedPacket_Larger.png";
+	img.onload = function() {
+		can.drawImage(img, 0, 0);
+	}
+</script>
+</body>
+</html>

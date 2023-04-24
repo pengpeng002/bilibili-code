@@ -1,0 +1,91 @@
+/* 不要设置body，会有bug */
+/* body { */
+	/* margin: 0; */
+	/* padding: 0; */
+/* } */
+
+.context {
+	background: url(images/firstScene/background.png);
+	width: 900px;
+	height: 600px;
+	display: block;
+	/* float: center; */
+	margin: 0 auto;
+	position: relative;
+}
+
+.btn-startGame {
+	position: relative;
+	background: url(images/firstScene/button1.png);
+	left: 470px;
+	top: 80px;
+	width: 331px;
+	height: 146px;
+	cursor: pointer;
+}
+
+.btn-startGame:hover {
+	background: url(images/firstScene/button1_light.png);
+}
+
+#audios {
+	autoplay: true;
+	loop: true;
+}
+
+.btn-menu {
+	background: url(images/button.png);
+	display: none;
+	float: right;
+	left: 770px;
+	width: 113px;
+	height: 41px;
+	color: #00CB08;
+	line-height: 41px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: '黑体';
+    cursor: pointer;
+	position: absolute;
+}
+
+.btn-menu:hover {
+	color: #00EE08;
+}
+
+
+.btn-continue {
+	background: url(images/option_button.png) no-repeat;
+	background-size: 100% 100%;
+	display: block;
+	left: 23px;
+	top: 320px;
+	width: 300px;
+	height: 70px;
+	color: #00CB08;
+	line-height: 70px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    font-family: '黑体';
+    cursor: pointer;
+	position: absolute;
+}
+
+.btn-continue:hover {
+	color: #00EE00;
+	/* background: url(images/option_button1.png) no-repeat; */
+}
+
+.options {
+	background: url(images/options.png) no-repeat;
+	background-size: 80% 80%;
+	display: none;
+	top: 100px;
+	left: 260px;
+	width: 423px;
+	height: 498px;
+	position: absolute;
+}
+
