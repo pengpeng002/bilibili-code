@@ -13,7 +13,7 @@ BEGIN
 		MENUITEM "人先手",						  ID_FIRST_HUMAN
 		MENUITEM "电脑先手",						  ID_FIRST_AI
 		END
-//		MENUITEM "人机对战",                      ID_AI
+		MENUITEM "悔棋",                      	ID_REACT 
 		MENUITEM SEPARATOR
 		MENUITEM "退出",                          ID_EXIT
 	END
