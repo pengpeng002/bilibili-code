@@ -30,3 +30,4 @@
 #define IDC_STATIC 1033
 #define ID_FIRST_HUMAN 1034
 #define ID_FIRST_AI 1035
+#define ID_REACT 1036
