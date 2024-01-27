@@ -1,9 +1,9 @@
 /*
-	Name: Îå×ÓÆå 
+	Name: äº”å­æ£‹ 
 	Copyright: pengpeng 
-	Author: ÅôÅô 
+	Author: é¹é¹ 
 	Date: 2021/12/01 15:53
-	Description: Îå×ÓÆåÓÎÏ· 
+	Description: äº”å­æ£‹æ¸¸æˆ 
 */
 
 #include <windows.h>
@@ -11,38 +11,38 @@
 #include <time.h>
 #include <algorithm>
 #include <vector>
-#include "res.h"//×ÊÔ´ÎÄ¼ş 
+#include "res.h"//èµ„æºæ–‡ä»¶ 
 using namespace std;
 
-#define SPACE 0 // Î´ÏÂ×Ó 
-#define HUMAN (nowBlack ? 1 : -1) // ±»Íæ¼ÒÏÂ×Ó 
-#define AI (nowBlack ? -1 : 1) // ±»AIÏÂ×Ó 
-const char* WINDOW_TITLE = "¡¾Îå×ÓÆå¡¿"; // ±êÌâ 
-const char* WINDOW_CLASS_NAME = WINDOW_TITLE; // ÀàÃû 
-const int BLOCK_SIZE = 30; // ÆåÅÌÁ½ÌõÏßÖ®¼äµÄ¼ä¸ô 
-const int LINES = 15; // ÆåÅÌÏßµÄÌõÊı 
-const int MARGIN = 15; // ÆåÅÌ±ßÔµÓë¶Ô»°¿ò±ßÔµµÄ¿ÕÏ¶ 
-const int RADIUS = 10; // Æå×Ó»æÖÆ°ë¾¶
-const int BORDER = (LINES - 1) * BLOCK_SIZE; // ÆåÅÌµÄ´óĞ¡
-const int MARK_SIZE = 6; // Âä×Ó±ê¼ÇÎó²î·¶Î§ 
-const int WINDOW_HEIGHT = BORDER + MARGIN * 2 + 50; // ¶Ô»°¿ò´°¿Ú¸ß¶È 
-const int WINDOW_WIDTH = BORDER + MARGIN * 2 + 10; // ¶Ô»°¿ò´°¿Ú¿í¶È 
-int maps[LINES+2][LINES+2]; // ÆåÅÌÊı×é£¬È¡Öµ-1(white) 0(space) 1(black) 
-int score[LINES+2][LINES+2]; // ÆÀ·ÖÊı×é 
-int px=-1, py=-1; // Êó±êÒÆ¶¯µ½µÄÆåÅÌ×ø±ê 
-bool nowBlack = 1; // ÊÇ·ñµ±Ç°ÎªºÚ×ÓÏÂ 
-bool inGrid=0; // px py È¡ÖµÊÇ·ñÓĞĞ§ 
-bool gameOver = 0; // µ±Ç°ÓÎÏ·ÊÇ·ñÒÑ¾­½áÊø 
-bool bWin = 0; // ÊÇ·ñÍæ¼ÒÓ®ÁË 
-bool useAI = 1; // ÊÇ·ñÈË»ú¶ÔÕ½ 
-bool firstAI = 0; // ÊÇ·ñAIÏÈÊÖ 
-int ppx[]={3,7,11,11,3}; // ÆåÅÌÖĞ¼¸¸öÌØÊâ±ê¼ÇµãµÄX×ø±ê 
-int ppy[]={3,7,11,3,11}; // ÆåÅÌÖĞ¼¸¸öÌØÊâ±ê¼ÇµãµÄY×ø±ê 
+#define SPACE 0 // æœªä¸‹å­ 
+#define HUMAN (nowBlack ? 1 : -1) // è¢«ç©å®¶ä¸‹å­ 
+#define AI (nowBlack ? -1 : 1) // è¢«AIä¸‹å­ 
+const char* WINDOW_TITLE = "ã€äº”å­æ£‹ã€‘"; // æ ‡é¢˜ 
+const char* WINDOW_CLASS_NAME = WINDOW_TITLE; // ç±»å 
+const int BLOCK_SIZE = 30; // æ£‹ç›˜ä¸¤æ¡çº¿ä¹‹é—´çš„é—´éš” 
+const int LINES = 15; // æ£‹ç›˜çº¿çš„æ¡æ•° 
+const int MARGIN = 15; // æ£‹ç›˜è¾¹ç¼˜ä¸å¯¹è¯æ¡†è¾¹ç¼˜çš„ç©ºéš™ 
+const int RADIUS = 10; // æ£‹å­ç»˜åˆ¶åŠå¾„
+const int BORDER = (LINES - 1) * BLOCK_SIZE; // æ£‹ç›˜çš„å¤§å°
+const int MARK_SIZE = 6; // è½å­æ ‡è®°è¯¯å·®èŒƒå›´ 
+const int WINDOW_HEIGHT = BORDER + MARGIN * 2 + 50; // å¯¹è¯æ¡†çª—å£é«˜åº¦ 
+const int WINDOW_WIDTH = BORDER + MARGIN * 2 + 10; // å¯¹è¯æ¡†çª—å£å®½åº¦ 
+int maps[LINES+2][LINES+2]; // æ£‹ç›˜æ•°ç»„ï¼Œå–å€¼-1(white) 0(space) 1(black) 
+int score[LINES+2][LINES+2]; // è¯„åˆ†æ•°ç»„ 
+int px=-1, py=-1; // é¼ æ ‡ç§»åŠ¨åˆ°çš„æ£‹ç›˜åæ ‡ 
+bool nowBlack = 1; // æ˜¯å¦å½“å‰ä¸ºé»‘å­ä¸‹ 
+bool inGrid=0; // px py å–å€¼æ˜¯å¦æœ‰æ•ˆ 
+bool gameOver = 0; // å½“å‰æ¸¸æˆæ˜¯å¦å·²ç»ç»“æŸ 
+bool bWin = 0; // æ˜¯å¦ç©å®¶èµ¢äº† 
+bool useAI = 1; // æ˜¯å¦äººæœºå¯¹æˆ˜ 
+bool firstAI = 0; // æ˜¯å¦AIå…ˆæ‰‹ 
+int ppx[]={3,7,11,11,3}; // æ£‹ç›˜ä¸­å‡ ä¸ªç‰¹æ®Šæ ‡è®°ç‚¹çš„Xåæ ‡ 
+int ppy[]={3,7,11,3,11}; // æ£‹ç›˜ä¸­å‡ ä¸ªç‰¹æ®Šæ ‡è®°ç‚¹çš„Yåæ ‡ 
 
 HWND hwnd;
 HDC hdc;
-HDC mdc = NULL; // ÄÚ´æDC¾ä±ú
-HBITMAP bmp2; // ÄÚ´æDCµÄbmp 
+HDC mdc = NULL; // å†…å­˜DCå¥æŸ„
+HBITMAP bmp2; // å†…å­˜DCçš„bmp 
 HINSTANCE inst;
 HMENU hmenu = NULL;
 bool useCache = 0;
@@ -204,7 +204,7 @@ void drawWindow(HDC &hdc)
 
 void tipsAndInit(int ID)
 {
-	int ret = MessageBox(::hwnd, "È·¶¨¿ªÊ¼ĞÂÓÎÏ·Âğ?", "tips", MB_OKCANCEL);
+	int ret = MessageBox(::hwnd, "ç¡®å®šå¼€å§‹æ–°æ¸¸æˆå—?", "tips", MB_OKCANCEL);
 	if (ret == IDOK)
 	{
 		memset(maps, 0, sizeof(maps));
@@ -235,10 +235,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 	switch(Message) {
 		case WM_PAINT: {
 			PAINTSTRUCT ps;
-			BeginPaint(hwnd, &ps);//±Ø²»¿ÉÉÙ£¬²»È»MessageBox²»»áÁ¢¿Ìµ¯³ö£¬Ô­Òò²»ÖªµÀ 
+			BeginPaint(hwnd, &ps);//å¿…ä¸å¯å°‘ï¼Œä¸ç„¶MessageBoxä¸ä¼šç«‹åˆ»å¼¹å‡ºï¼ŒåŸå› ä¸çŸ¥é“ 
 			if (useCache)
 			{
-				mdc = CreateCompatibleDC(hdc);//´´½¨Ò»¸öºÍhdc¼æÈİµÄÄÚ´æDC
+				mdc = CreateCompatibleDC(hdc);//åˆ›å»ºä¸€ä¸ªå’Œhdcå…¼å®¹çš„å†…å­˜DC
 				bmp2 = CreateCompatibleBitmap(hdc, WINDOW_WIDTH, WINDOW_HEIGHT);
 				SelectObject(mdc, bmp2);
 			}
@@ -254,13 +254,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 			PostQuitMessage(0);
 			break;
 		}
-		case WM_SYSCOMMAND: {//ÏµÍ³ÏûÏ¢£¬µã»÷±êÌâÀ¸£¿ 
-			if (wParam == SC_MAXIMIZE) ;//½ûÓÃ×î´ó»¯°´Å¥ 
+		case WM_SYSCOMMAND: {//ç³»ç»Ÿæ¶ˆæ¯ï¼Œç‚¹å‡»æ ‡é¢˜æ ï¼Ÿ 
+			if (wParam == SC_MAXIMIZE) ;//ç¦ç”¨æœ€å¤§åŒ–æŒ‰é’® 
 			else DefWindowProc(hwnd, Message, wParam, lParam);
 			break;
 		}
-		case WM_NCRBUTTONDOWN://ÔÚ·Ç¹¤×÷Çø°´ÏÂÓÒ¼ü
-		case WM_NCLBUTTONDBLCLK: {//ÔÚ·Ç¹¤×÷ÇøË«»÷ÓÒ»÷
+		case WM_NCRBUTTONDOWN://åœ¨éå·¥ä½œåŒºæŒ‰ä¸‹å³é”®
+		case WM_NCLBUTTONDBLCLK: {//åœ¨éå·¥ä½œåŒºåŒå‡»å³å‡»
 			break;
 		}
 		case WM_MOUSEMOVE: {
@@ -331,19 +331,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 					tipsAndInit(LOWORD(wParam));
 					break;
 				}
-				case ID_EXIT://ÍË³ö 
+				case ID_EXIT://é€€å‡º 
 				{
 					PostQuitMessage(0);
 					break;
 				}
-				case ID_SHOW_HELP://°ïÖú 
+				case ID_SHOW_HELP://å¸®åŠ© 
 				{
-					MessageBox(hwnd, "Îå¿ÅÏàÍ¬ÑÕÉ«µÄÆå×ÓÁ¬³ÉÒ»ÌõÖ±Ïß¼´»ñµÃÊ¤Àû", "Help", 0);
+					MessageBox(hwnd, "äº”é¢—ç›¸åŒé¢œè‰²çš„æ£‹å­è¿æˆä¸€æ¡ç›´çº¿å³è·å¾—èƒœåˆ©", "Help", 0);
 					break;
 				}
-				case ID_ABOUT://¹ØÓÚ 
+				case ID_ABOUT://å…³äº 
 				{
-					MessageBox(hwnd, "Name: Îå×ÓÆå\nCopyright: pengpeng\nAuthor: ÅôÅô\nDate: 2021/12/01 15:53\nDescription: Îå×ÓÆåÓÎÏ·", "About", 0);
+					MessageBox(hwnd, "Name: äº”å­æ£‹\nCopyright: pengpeng\nAuthor: é¹é¹\nDate: 2021/12/01 15:53\nDescription: äº”å­æ£‹æ¸¸æˆ", "About", 0);
 					break;
 				}
 			}
@@ -425,11 +425,11 @@ void calcScore()
 			    	{
 			    		if (x!=0 || y!=0)
 			    		{
-			    			int humanNum = 0; // Íæ¼ÒÁ¬³É×ÓµÄ¸öÊı
-						    int robotNum = 0; // AIÁ¬³É×ÓµÄ¸öÊı
-						    int emptyNum = 0; // ¸÷·½Ïò¿Õ°×Î»µÄ¸öÊı
+			    			int humanNum = 0; // ç©å®¶è¿æˆå­çš„ä¸ªæ•°
+						    int robotNum = 0; // AIè¿æˆå­çš„ä¸ªæ•°
+						    int emptyNum = 0; // å„æ–¹å‘ç©ºç™½ä½çš„ä¸ªæ•°
 			    
-			    			for (int d=1; d<=4; d++)//µ±AIÏÂ×ÓµÄÊ±ºò£¬¿ÉÒÔÈÏÎªÒ»¶¨Ã»ÓĞÁ¬³É5¸ö×ÓµÄ 
+			    			for (int d=1; d<=4; d++)//å½“AIä¸‹å­çš„æ—¶å€™ï¼Œå¯ä»¥è®¤ä¸ºä¸€å®šæ²¡æœ‰è¿æˆ5ä¸ªå­çš„ 
 			    			{
 			    				int dx=i+d*x, dy = j+d*y;
 			    				if (dx>=0 && dx<LINES && dy>=0 && dy<LINES)
@@ -444,7 +444,7 @@ void calcScore()
 								}
 							}
 							
-							for (int d=1; d<=4; d++)//µ±AIÏÂ×ÓµÄÊ±ºò£¬¿ÉÒÔÈÏÎªÒ»¶¨Ã»ÓĞÁ¬³É5¸ö×ÓµÄ 
+							for (int d=1; d<=4; d++)//å½“AIä¸‹å­çš„æ—¶å€™ï¼Œå¯ä»¥è®¤ä¸ºä¸€å®šæ²¡æœ‰è¿æˆ5ä¸ªå­çš„ 
 			    			{
 			    				int dx=i-d*x, dy = j-d*y;
 			    				if (dx>=0 && dx<LINES && dy>=0 && dy<LINES)
@@ -474,7 +474,7 @@ void calcScore()
 							
 							emptyNum = 0;
 							
-							for (int d=1; d<=4; d++)//µ±AIÏÂ×ÓµÄÊ±ºò£¬¿ÉÒÔÈÏÎªÒ»¶¨Ã»ÓĞÁ¬³É5¸ö×ÓµÄ 
+							for (int d=1; d<=4; d++)//å½“AIä¸‹å­çš„æ—¶å€™ï¼Œå¯ä»¥è®¤ä¸ºä¸€å®šæ²¡æœ‰è¿æˆ5ä¸ªå­çš„ 
 			    			{
 			    				int dx=i+d*x, dy = j+d*y;
 			    				if (dx>=0 && dx<LINES && dy>=0 && dy<LINES)
@@ -489,7 +489,7 @@ void calcScore()
 								}
 							}
 							
-							for (int d=1; d<=4; d++)//µ±AIÏÂ×ÓµÄÊ±ºò£¬¿ÉÒÔÈÏÎªÒ»¶¨Ã»ÓĞÁ¬³É5¸ö×ÓµÄ 
+							for (int d=1; d<=4; d++)//å½“AIä¸‹å­çš„æ—¶å€™ï¼Œå¯ä»¥è®¤ä¸ºä¸€å®šæ²¡æœ‰è¿æˆ5ä¸ªå­çš„ 
 			    			{
 			    				int dx=i-d*x, dy = j-d*y;
 			    				if (dx>=0 && dx<LINES && dy>=0 && dy<LINES)
